@@ -19,14 +19,11 @@ class NotificationService {
       final String? timeZoneName = await _channel.invokeMethod('getTimezone');
       if (timeZoneName != null) {
         try {
-          // Try to set the location returned by the system
           tz.setLocalLocation(tz.getLocation(timeZoneName));
         } catch (e) {
-          // Fallback: If "Asia/Calcutta" fails, try "Asia/Kolkata"
           if (timeZoneName == "Asia/Calcutta") {
             tz.setLocalLocation(tz.getLocation("Asia/Kolkata"));
           } else {
-            // Default to UTC if all else fails to prevent crash
             tz.setLocalLocation(tz.UTC);
           }
           debugPrint("Timezone fallback used for: $timeZoneName");
@@ -40,8 +37,16 @@ class NotificationService {
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const InitializationSettings settings =
-        InitializationSettings(android: androidSettings);
+    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
+    const InitializationSettings settings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
 
     await _notifications.initialize(settings);
 
@@ -83,52 +88,28 @@ class NotificationService {
     final tz.TZDateTime tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
     final tz.TZDateTime notificationTime = tzScheduled.subtract(Duration(minutes: minutesBefore));
 
-    debugPrint("Current time (local): ${tz.TZDateTime.now(tz.local)}");
-    debugPrint("Target notification time: $notificationTime");
-
     if (notificationTime.isBefore(tz.TZDateTime.now(tz.local))) {
-      debugPrint("Notification time is in the past.");
       return;
     }
 
-    try {
-      await _notifications.zonedSchedule(
-        id,
-        "Task Reminder",
-        title,
-        notificationTime,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'task_channel',
-            'Task Reminders',
-            importance: Importance.max,
-            priority: Priority.high,
-            fullScreenIntent: true,
-          ),
+    await _notifications.zonedSchedule(
+      id,
+      "Task Reminder",
+      title,
+      notificationTime,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'task_channel',
+          'Task Reminders',
+          importance: Importance.max,
+          priority: Priority.high,
         ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-      debugPrint("Notification scheduled EXACTLY");
-    } catch (e) {
-      debugPrint("Exact failed, using inexact: $e");
-      await _notifications.zonedSchedule(
-        id,
-        "Task Reminder",
-        title,
-        notificationTime,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'task_channel',
-            'Task Reminders',
-          ),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-    }
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
   }
 
   static Future<void> showInstantNotification(String title) async {
@@ -143,6 +124,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.high,
         ),
+        iOS: DarwinNotificationDetails(),
       ),
     );
   }
