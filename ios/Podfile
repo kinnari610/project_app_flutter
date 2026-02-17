@@ -37,12 +37,12 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
 
     target.build_configurations.each do |config|
-      # Fix iOS version
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+      # Force all targets to 13.0 to fix the Xcode 'unsupported option -G' error
+      # This is required for Xcode 15+ compatibility
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
 
-      # 🔥 REMOVE INVALID FLAGS (MAIN FIX)
-      config.build_settings['OTHER_CFLAGS'] = ''
-      config.build_settings['OTHER_CPLUSPLUSFLAGS'] = ''
+      # Bitcode is deprecated and can cause build issues in newer Xcode versions
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
     end
   end
 end
