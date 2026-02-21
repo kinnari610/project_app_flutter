@@ -43,6 +43,11 @@ post_install do |installer|
 
       # Bitcode is deprecated and can cause build issues in newer Xcode versions
       config.build_settings['ENABLE_BITCODE'] = 'NO'
+
+      # Fix the '-G' error by removing it from OTHER_CFLAGS
+      if config.build_settings['OTHER_CFLAGS']
+        config.build_settings['OTHER_CFLAGS'].delete('-G')
+      end
     end
   end
 end

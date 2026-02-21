@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <base href="/" />
   <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
@@ -15,24 +16,49 @@
     the `--base-href` argument provided to `flutter build`.
   -->
   <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Mototek Company">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="project_app_flutter">
+  <meta name="apple-mobile-web-app-title" content="Mototek Company">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Windows PWA Icons -->
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="icons/Icon-192.png">
+  <meta name="theme-color" content="#0A73FF">
+
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/Icon-512.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>project_app_flutter</title>
+  <title>MototekCompany</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+  <!-- Firebase JS SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5f7ydexAf0aUACoBCS9FZQ4xHx0gFEq4",
+      authDomain: "projectappflutter-adf21.firebaseapp.com",
+      projectId: "projectappflutter-adf21",
+      storageBucket: "projectappflutter-adf21.appspot.com",
+      messagingSenderId: "429711477561",
+      appId: "1:429711477561:web:3da5d8924e155da6caf6e8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+  </script>
 </body>
 </html>

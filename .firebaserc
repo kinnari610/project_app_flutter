@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "default": "projectappflutter-adf21"
+  },
+  "targets": {
+    "projectappflutter-adf21": {
+      "hosting": {
+        "mototek": [
+          "mototek",
+          "mototekcompany"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

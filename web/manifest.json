@@ -1,13 +1,12 @@
 {
-    "name": "project_app_flutter",
-    "short_name": "project_app_flutter",
-    "start_url": ".",
+    "name": "Mototek Company",
+    "short_name": "Mototek",
+    "start_url": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
-    "prefer_related_applications": false,
+    "background_color": "#ffffff",
+    "theme_color": "#0A73FF",
+    "orientation": "portrait",
+    "description": "Mototek Company Portal",
     "icons": [
         {
             "src": "icons/Icon-192.png",

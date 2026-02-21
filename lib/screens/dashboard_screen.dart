@@ -5,6 +5,17 @@ import 'login_screen.dart';
 import 'forms_screen.dart';
 import 'sheets_screen.dart';
 import 'calendar_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+Future<void> saveTask() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  String? token = await messaging.getToken();
+
+
+
+
+  print("Task saved with token");
+}
 
 class DashboardScreen extends StatelessWidget {
   DashboardScreen({super.key});

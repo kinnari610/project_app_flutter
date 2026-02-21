@@ -27,20 +27,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Color getUserColor(String? email) {
     switch (email) {
-      case "niraj@mototek.in": return Colors.blue;
-      case "dhruvish@mototek.in": return Colors.green;
-      case "krushan@mototek.in": return Colors.orange;
-      case "nishant@mototek.in": return Colors.red;
-      default: return Colors.grey;
+      case "niraj@mototek.in":
+        return Colors.blue;
+      case "dhruvish@mototek.in":
+        return Colors.green;
+      case "krushan@mototek.in":
+        return Colors.orange;
+      case "nishant@mototek.in":
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   String getNameFromEmail(String email) {
-    final member = teamMembers.firstWhere((m) => m["email"] == email, orElse: () => {"name": email});
+    final member = teamMembers.firstWhere((m) => m["email"] == email,
+        orElse: () => {"name": email});
     return member["name"]!;
   }
 
-  Future<void> addTask(String title, TimeOfDay time, List<String> assignedPeople) async {
+  Future<void> addTask(
+      String title, TimeOfDay time, List<String> assignedPeople) async {
     final docRef = await FirebaseFirestore.instance.collection("tasks").add({
       "title": title,
       "date": Timestamp.fromDate(_selectedDay),
@@ -51,15 +58,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
       "assignedTo": assignedPeople,
     });
 
-    final scheduledDate = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day, time.hour, time.minute);
-    await NotificationService.scheduleNotification(id: docRef.id.hashCode, title: title, scheduledDate: scheduledDate);
+    final scheduledDate = DateTime(_selectedDay.year, _selectedDay.month,
+        _selectedDay.day, time.hour, time.minute);
+    await NotificationService.scheduleNotification(
+        id: docRef.id.hashCode, title: title, scheduledDate: scheduledDate);
   }
 
   Future<void> toggleComplete(String id, bool value) async {
-    await FirebaseFirestore.instance.collection("tasks").doc(id).update({"completed": value});
+    await FirebaseFirestore.instance
+        .collection("tasks")
+        .doc(id)
+        .update({"completed": value});
   }
 
-  Future<void> updateTask(String id, String newTitle, DateTime newDate, TimeOfDay newTime) async {
+  Future<void> updateTask(
+      String id, String newTitle, DateTime newDate, TimeOfDay newTime) async {
     await FirebaseFirestore.instance.collection("tasks").doc(id).update({
       "title": newTitle,
       "date": Timestamp.fromDate(newDate),
@@ -67,8 +80,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
       "minute": newTime.minute,
     });
 
-    final scheduledDate = DateTime(newDate.year, newDate.month, newDate.day, newTime.hour, newTime.minute);
-    await NotificationService.scheduleNotification(id: id.hashCode, title: newTitle, scheduledDate: scheduledDate);
+    final scheduledDate = DateTime(
+        newDate.year, newDate.month, newDate.day, newTime.hour, newTime.minute);
+    await NotificationService.scheduleNotification(
+        id: id.hashCode, title: newTitle, scheduledDate: scheduledDate);
   }
 
   Future<void> deleteTask(String id) async {
@@ -90,7 +105,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(controller: titleController, decoration: const InputDecoration(labelText: "Task Name")),
+                  TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: "Task Name")),
                   const SizedBox(height: 15),
                   Row(
                     children: [
@@ -98,15 +115,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       const Spacer(),
                       TextButton(
                         onPressed: () async {
-                          final picked = await showTimePicker(context: context, initialTime: selectedTime);
-                          if (picked != null) setDialogState(() => selectedTime = picked);
+                          final picked = await showTimePicker(
+                              context: context, initialTime: selectedTime);
+                          if (picked != null) {
+                            setDialogState(() => selectedTime = picked);
+                          }
                         },
                         child: const Text("Pick"),
                       )
                     ],
                   ),
                   const SizedBox(height: 15),
-                  const Align(alignment: Alignment.centerLeft, child: Text("Assign To:", style: TextStyle(fontWeight: FontWeight.bold))),
+                  const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Assign To:",
+                          style: TextStyle(fontWeight: FontWeight.bold))),
                   ...teamMembers.map((member) {
                     bool isSelected = selectedPeople.contains(member["email"]);
                     return CheckboxListTile(
@@ -114,8 +137,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       title: Text(member["name"]!),
                       onChanged: (value) {
                         setDialogState(() {
-                          if (value == true) selectedPeople.add(member["email"]!);
-                          else selectedPeople.remove(member["email"]);
+                          if (value == true) {
+                            selectedPeople.add(member["email"]!);
+                          } else {
+                            selectedPeople.remove(member["email"]);
+                          }
                         });
                       },
                     );
@@ -127,8 +153,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
               TextButton(
                 onPressed: () async {
                   if (titleController.text.isNotEmpty) {
-                    await addTask(titleController.text, selectedTime, selectedPeople);
-                    if (mounted) Navigator.pop(context);
+                    await addTask(
+                        titleController.text, selectedTime, selectedPeople);
+                    if (context.mounted) Navigator.pop(context);
                   }
                 },
                 child: const Text("Save"),
@@ -140,8 +167,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  void showEditDialog(String id, String currentTitle, DateTime currentDate, TimeOfDay currentTime) {
-    TextEditingController titleController = TextEditingController(text: currentTitle);
+  void showEditDialog(
+      String id, String currentTitle, DateTime currentDate, TimeOfDay currentTime) {
+    TextEditingController titleController =
+        TextEditingController(text: currentTitle);
     DateTime selectedDate = currentDate;
     TimeOfDay selectedTime = currentTime;
 
@@ -155,11 +184,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(controller: titleController, decoration: const InputDecoration(labelText: "Task Name")),
+                  TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: "Task Name")),
                   const SizedBox(height: 15),
                   Row(
                     children: [
-                      Text("Date: ${DateFormat('dd-MM-yyyy').format(selectedDate)}"),
+                      Text(
+                          "Date: ${DateFormat('dd-MM-yyyy').format(selectedDate)}"),
                       const Spacer(),
                       TextButton(
                         onPressed: () async {
@@ -169,7 +201,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             firstDate: DateTime(2020),
                             lastDate: DateTime(2030),
                           );
-                          if (picked != null) setDialogState(() => selectedDate = picked);
+                          if (picked != null) {
+                            setDialogState(() => selectedDate = picked);
+                          }
                         },
                         child: const Text("Pick"),
                       )
@@ -181,8 +215,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       const Spacer(),
                       TextButton(
                         onPressed: () async {
-                          final picked = await showTimePicker(context: context, initialTime: selectedTime);
-                          if (picked != null) setDialogState(() => selectedTime = picked);
+                          final picked = await showTimePicker(
+                              context: context, initialTime: selectedTime);
+                          if (picked != null) {
+                            setDialogState(() => selectedTime = picked);
+                          }
                         },
                         child: const Text("Pick"),
                       )
@@ -192,12 +229,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel")),
               TextButton(
                 onPressed: () async {
                   if (titleController.text.isNotEmpty) {
-                    await updateTask(id, titleController.text, selectedDate, selectedTime);
-                    if (mounted) Navigator.pop(context);
+                    await updateTask(id, titleController.text, selectedDate,
+                        selectedTime);
+                    if (context.mounted) Navigator.pop(context);
                   }
                 },
                 child: const Text("Save"),
@@ -212,28 +252,39 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void showCompletedTasks() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              const Text("Completed Tasks", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text("Completed Tasks",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const Divider(),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection("tasks").where("completed", isEqualTo: true).snapshots(),
+                  stream: FirebaseFirestore.instance
+                      .collection("tasks")
+                      .where("completed", isEqualTo: true)
+                      .snapshots(),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
                     var docs = snapshot.data!.docs;
-                    if (docs.isEmpty) return const Center(child: Text("No completed tasks yet"));
+                    if (docs.isEmpty) {
+                      return const Center(child: Text("No completed tasks yet"));
+                    }
                     return ListView.builder(
                       itemCount: docs.length,
                       itemBuilder: (context, index) {
                         var task = docs[index];
-                        Map<String, dynamic> data = task.data() as Map<String, dynamic>;
+                        Map<String, dynamic> data =
+                            task.data() as Map<String, dynamic>;
                         return ListTile(
-                          leading: const Icon(Icons.check_circle, color: Colors.green),
+                          leading:
+                              const Icon(Icons.check_circle, color: Colors.green),
                           title: Text(data["title"] ?? "Untitled"),
                           subtitle: Text("By: ${data["ownerEmail"]}"),
                         );
@@ -275,21 +326,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 }).toList();
               }
               return TableCalendar(
-                firstDay: DateTime(2020), lastDay: DateTime(2030), focusedDay: _focusedDay,
+                firstDay: DateTime(2020),
+                lastDay: DateTime(2030),
+                focusedDay: _focusedDay,
                 selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                onDaySelected: (selectedDay, focusedDay) => setState(() { _selectedDay = selectedDay; _focusedDay = focusedDay; }),
+                onDaySelected: (selectedDay, focusedDay) => setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                }),
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                 ),
                 calendarBuilders: CalendarBuilders(
                   defaultBuilder: (context, day, focusedDay) {
-                    bool hasTask = taskDates.any((taskDate) => isSameDay(taskDate, day));
+                    bool hasTask =
+                        taskDates.any((taskDate) => isSameDay(taskDate, day));
                     if (hasTask) {
                       return Container(
                         margin: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue.withOpacity(0.35)),
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.blue.withOpacity(0.35)),
                         alignment: Alignment.center,
-                        child: Text('${day.day}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text('${day.day}',
+                            style: const TextStyle(fontWeight: FontWeight.bold)),
                       );
                     }
                     return null;
@@ -303,23 +363,32 @@ class _CalendarScreenState extends State<CalendarScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection("tasks").snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 var docs = snapshot.data!.docs.where((doc) {
                   Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
                   DateTime taskDate = (data["date"] as Timestamp).toDate();
                   return isSameDay(taskDate, _selectedDay);
                 }).toList();
-                if (docs.isEmpty) return const Center(child: Text("No tasks for this day"));
+                if (docs.isEmpty) {
+                  return const Center(child: Text("No tasks for this day"));
+                }
                 return ListView.builder(
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
-                    var task = docs[index]; Map<String, dynamic> data = task.data() as Map<String, dynamic>;
+                    var task = docs[index];
+                    Map<String, dynamic> data =
+                        task.data() as Map<String, dynamic>;
                     bool isCompleted = data["completed"] ?? false;
                     bool isOwner = data["ownerEmail"] == user?.email;
                     Color ownerColor = getUserColor(data["ownerEmail"]);
-                    int hour = data["hour"] ?? 0; int minute = data["minute"] ?? 0;
+                    int hour = data["hour"] ?? 0;
+                    int minute = data["minute"] ?? 0;
                     List<dynamic> assignedTo = data["assignedTo"] ?? [];
-                    String assignedNames = assignedTo.map((email) => getNameFromEmail(email.toString())).join(", ");
+                    String assignedNames = assignedTo
+                        .map((email) => getNameFromEmail(email.toString()))
+                        .join(", ");
                     TimeOfDay time = TimeOfDay(hour: hour, minute: minute);
                     DateTime date = (data["date"] as Timestamp).toDate();
 
@@ -328,20 +397,40 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       child: ListTile(
                         isThreeLine: true,
                         leading: IconButton(
-                          icon: Icon(isCompleted ? Icons.check_circle : Icons.radio_button_unchecked, color: isOwner ? ownerColor : Colors.grey),
-                          onPressed: isOwner ? () => toggleComplete(task.id, !isCompleted) : null,
+                          icon: Icon(
+                              isCompleted
+                                  ? Icons.check_circle
+                                  : Icons.radio_button_unchecked,
+                              color: isOwner ? ownerColor : Colors.grey),
+                          onPressed: isOwner
+                              ? () => toggleComplete(task.id, !isCompleted)
+                              : null,
                         ),
-                        title: Text(data["title"] ?? "Untitled", style: TextStyle(decoration: isCompleted ? TextDecoration.lineThrough : null)),
-                        subtitle: Text("${time.format(context)} • By: ${data["ownerEmail"] ?? "Unknown"}\nAssigned: ${assignedNames.isEmpty ? "No one" : assignedNames}"),
-                        trailing: isOwner ? PopupMenuButton<String>(
-                          onSelected: (value) async {
-                            if (value == "edit") {
-                              showEditDialog(task.id, data["title"], date, time);
-                            }
-                            if (value == "delete") await deleteTask(task.id);
-                          },
-                          itemBuilder: (context) => const [PopupMenuItem(value: "edit", child: Text("Edit")), PopupMenuItem(value: "delete", child: Text("Delete"))],
-                        ) : null,
+                        title: Text(data["title"] ?? "Untitled",
+                            style: TextStyle(
+                                decoration: isCompleted
+                                    ? TextDecoration.lineThrough
+                                    : null)),
+                        subtitle: Text(
+                            "${time.format(context)} • By: ${data["ownerEmail"] ?? "Unknown"}\nAssigned: ${assignedNames.isEmpty ? "No one" : assignedNames}"),
+                        trailing: isOwner
+                            ? PopupMenuButton<String>(
+                                onSelected: (value) async {
+                                  if (value == "edit") {
+                                    showEditDialog(
+                                        task.id, data["title"], date, time);
+                                  }
+                                  if (value == "delete") {
+                                    await deleteTask(task.id);
+                                  }
+                                },
+                                itemBuilder: (context) => const [
+                                  PopupMenuItem(value: "edit", child: Text("Edit")),
+                                  PopupMenuItem(
+                                      value: "delete", child: Text("Delete"))
+                                ],
+                              )
+                            : null,
                       ),
                     );
                   },
@@ -351,7 +440,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
           )
         ],
       ),
-      floatingActionButton: FloatingActionButton(onPressed: showAddDialog, child: const Icon(Icons.add)),
+      floatingActionButton:
+          FloatingActionButton(onPressed: showAddDialog, child: const Icon(Icons.add)),
     );
   }
 }

@@ -4,19 +4,19 @@ List<Map<String, String>> getFormsByRole(String role) {
     if (normalizedRole == "OWNER") {
       return [
         {
-          "title": "EA Delegation From",
+          "title": "EA Delegation Form",
           "url": "https://docs.google.com/forms/d/e/1FAIpQLSe4b_hS445A4jlV5isW3NnuAQdGAWjR9xmnsx018I-uofHZEg/viewform"
         },
         {
-          "title": "Project Delegation From JP",
+          "title": "Project Delegation Form JP",
           "url": "https://docs.google.com/forms/d/e/1FAIpQLSdwvcPeuZLQhjR9GuI7nf4m-95gJ_8M2WnACA335KGuVj6gxw/viewform"
         },
         {
-          "title": "Design Department",
+          "title": "Design Department Form",
           "url": "https://docs.google.com/forms/d/e/1FAIpQLSd8CJZo9Dna03TuU5KwBoxPdzu-6qE5O9hMClRw9ODNZLHbYA/viewform"
         },
         {
-          "title": "Inquiry Quotation form ",
+          "title": "Inquiry Quotation Form ",
           "url": "https://docs.google.com/forms/d/e/1FAIpQLSdMm-x99DRtLwMVNTbjkwu1I0TEX44y8n03K4vxBCUzVEmjrg/viewform"
         },
       ];

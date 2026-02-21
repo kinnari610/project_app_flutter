@@ -3,45 +3,45 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
-  static const MethodChannel _channel = MethodChannel('com.mototek.portal/timezone');
+  FlutterLocalNotificationsPlugin();
+  static const MethodChannel _channel =
+  MethodChannel('com.mototek.portal/timezone');
 
   static Future<void> initialize() async {
+    // ❌ IMPORTANT: Skip everything for Web
+    if (kIsWeb) {
+      print("🌐 Web detected → using Firebase Push Notifications instead");
+      return;
+    }
+
     tz.initializeTimeZones();
-    
+
     try {
-      final String? timeZoneName = await _channel.invokeMethod('getTimezone');
-      if (timeZoneName != null) {
-        try {
+      if (Platform.isAndroid) {
+        final String? timeZoneName =
+        await _channel.invokeMethod('getTimezone');
+
+        if (timeZoneName != null) {
           tz.setLocalLocation(tz.getLocation(timeZoneName));
-        } catch (e) {
-          if (timeZoneName == "Asia/Calcutta") {
-            tz.setLocalLocation(tz.getLocation("Asia/Kolkata"));
-          } else {
-            tz.setLocalLocation(tz.UTC);
-          }
-          debugPrint("Timezone fallback used for: $timeZoneName");
+        } else {
+          tz.setLocalLocation(tz.getLocation("Asia/Kolkata"));
         }
-        debugPrint("Timezone initialized: ${tz.local.name}");
       }
     } catch (e) {
-      debugPrint("Failed to get timezone via channel: $e");
+      tz.setLocalLocation(tz.UTC);
     }
 
     const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+    const DarwinInitializationSettings iosSettings =
+    DarwinInitializationSettings();
 
     const InitializationSettings settings = InitializationSettings(
       android: androidSettings,
@@ -50,33 +50,12 @@ class NotificationService {
 
     await _notifications.initialize(settings);
 
-    if (Platform.isAndroid) {
-      final androidImplementation = _notifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      
-      await androidImplementation?.requestNotificationsPermission();
-    }
-  }
+    final androidImplementation = _notifications
+        .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
 
-  static Future<void> openAlarmSettings() async {
-    if (Platform.isAndroid) {
-      const intent = AndroidIntent(
-        action: 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM',
-        data: 'package:com.example.project_app_flutter',
-        flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
-      );
-      try {
-        await intent.launch();
-      } catch (e) {
-        debugPrint("Could not open alarm settings: $e");
-        const intentGeneral = AndroidIntent(
-          action: 'android.settings.SETTINGS',
-          flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
-        );
-        await intentGeneral.launch();
-      }
-    }
+    await androidImplementation?.requestNotificationsPermission();
+    await androidImplementation?.requestExactAlarmsPermission();
   }
 
   static Future<void> scheduleNotification({
@@ -85,12 +64,13 @@ class NotificationService {
     required DateTime scheduledDate,
     int minutesBefore = 30,
   }) async {
-    final tz.TZDateTime tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
-    final tz.TZDateTime notificationTime = tzScheduled.subtract(Duration(minutes: minutesBefore));
+    // ❌ Skip local scheduling on web
+    if (kIsWeb) return;
 
-    if (notificationTime.isBefore(tz.TZDateTime.now(tz.local))) {
-      return;
-    }
+    final tz.TZDateTime tzScheduled =
+    tz.TZDateTime.from(scheduledDate, tz.local);
+    final tz.TZDateTime notificationTime =
+    tzScheduled.subtract(Duration(minutes: minutesBefore));
 
     await _notifications.zonedSchedule(
       id,
@@ -108,24 +88,7 @@ class NotificationService {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
-  }
-
-  static Future<void> showInstantNotification(String title) async {
-    await _notifications.show(
-      0,
-      "Instant Test",
-      title,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'test_channel',
-          'Tests',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
+      UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 }
