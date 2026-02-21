@@ -67,7 +67,7 @@ class DashboardScreen extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: Colors.blue.shade700,
             title: const Text(
-              "Company Portal",
+              "Power Drives",
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
             centerTitle: true,
